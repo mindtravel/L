@@ -21,6 +21,34 @@
     <div class="turnpill" id="turnpill"><span class="swatch"></span><span id="turntext">黑方回合</span></div>
   </header>
 
+  <section class="start-screen" id="startScreen">
+    <div class="start-box">
+      <h2>开始游戏</h2>
+      <p class="start-sub">选择模式和棋盘，然后开始一局。</p>
+      <div class="fields">
+        <span>模式</span>
+        <select id="selMode">
+          <option value="pvp">双人同机</option>
+          <option value="pve">人机 · 我执黑</option>
+          <option value="evp">人机 · 我执白</option>
+          <option value="eve">AI 自弈（观赏）</option>
+          <option value="online">联机对弈</option>
+        </select>
+        <span>电脑</span>
+        <select id="selLevel"><option value="1">随手</option><option value="2" selected>稳健</option><option value="3">凶狠</option></select>
+        <span>棋盘</span>
+        <select id="selSize"><option value="13" selected>13 × 13 格</option><option value="15">15 × 15 格</option><option value="17">17 × 17 格</option><option value="19">19 × 19 格</option><option value="21">21 × 21 格</option></select>
+      </div>
+      <div class="room-controls" id="roomControls" hidden>
+        <button id="btnCreateRoom">创建房间</button>
+        <input id="roomIdInput" maxlength="8" placeholder="房间号" aria-label="房间号">
+        <button id="btnJoinRoom">加入</button>
+        <small id="roomStatus">未连接</small>
+      </div>
+      <button class="primary start-button" id="btnStartGame">开始</button>
+    </div>
+  </section>
+
   <main>
     <section class="boardcard">
       <div id="boardwrap">
@@ -63,41 +91,7 @@
         </div>
       </div>
 
-      <div class="card">
-        <h3>设 置</h3>
-        <div class="fields">
-          <span>模式</span>
-          <select id="selMode">
-            <option value="pvp">双人同机</option>
-            <option value="pve">人机 · 我执黑</option>
-            <option value="evp">人机 · 我执白</option>
-            <option value="eve">AI 自弈（观赏）</option>
-            <option value="online">联机对弈</option>
-          </select>
-          <span>电脑</span>
-          <select id="selLevel">
-            <option value="1">随手</option>
-            <option value="2" selected>稳健</option>
-            <option value="3">凶狠</option>
-          </select>
-          <span>棋盘</span>
-          <select id="selSize">
-            <option value="13" selected>13 × 13 格</option>
-            <option value="15">15 × 15 格</option>
-            <option value="17">17 × 17 格</option>
-            <option value="19">19 × 19 格</option>
-            <option value="21">21 × 21 格</option>
-          </select>
-          <label class="chk"><input type="checkbox" id="chkHints" checked>显示可落子提示（H）</label>
-          <label class="chk"><input type="checkbox" id="chkSfx" checked>音效</label>
-        </div>
-        <div class="room-controls" id="roomControls" hidden>
-          <button id="btnCreateRoom">创建房间</button>
-          <input id="roomIdInput" maxlength="8" placeholder="房间号" aria-label="房间号">
-          <button id="btnJoinRoom">加入</button>
-          <small id="roomStatus">未连接</small>
-        </div>
-      </div>
+      <div class="card"><h3>显示</h3><div class="controls"><label class="chk"><input type="checkbox" id="chkHints" checked>显示提示（H）</label><label class="chk"><input type="checkbox" id="chkSfx" checked>音效</label></div></div>
 
       <div class="card">
         <h3>着 法</h3>

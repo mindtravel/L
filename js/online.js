@@ -22,6 +22,7 @@
       if (msg.player != null) player = msg.player;
       if (msg.type === 'created' || msg.type === 'joined') {
         ZJ.game.setOnlinePlayer(player); ZJ.game.applyOnlineState(msg.state);
+        var start = document.getElementById('startScreen'); if (start) start.hidden = true;
         status('房间 ' + roomId + ' · ' + (player === 0 ? '黑方' : '白方'));
       } else if (msg.type === 'move' || msg.type === 'state') {
         ZJ.game.applyOnlineState(msg.state);

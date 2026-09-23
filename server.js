@@ -29,7 +29,7 @@ function publicState(room) {
 }
 
 function send(ws, type, payload) {
-  if (ws.readyState === ws.OPEN) ws.send(JSON.stringify({ type, ...payload }));
+  if (ws.readyState === 1) ws.send(JSON.stringify({ type, ...payload }));
 }
 
 function broadcast(room, type, payload) {

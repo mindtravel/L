@@ -64,6 +64,13 @@ main{display:grid;grid-template-columns:minmax(320px,1fr) 340px;gap:18px;align-i
   margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);
 }
 
+.start-screen{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(246,246,246,.96)}
+.start-screen[hidden]{display:none}
+.start-box{width:min(420px,calc(100vw - 32px));padding:28px;border:1px solid var(--ink);background:var(--paper)}
+.start-box h2{margin:0;font-size:24px;letter-spacing:.14em}
+.start-sub{margin:5px 0 22px;color:var(--ink-2);font:12px var(--mono)}
+.start-button{width:100%;margin-top:18px}
+
 /* ---------- 键盘可达性 ---------- */
 button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visible,canvas:focus-visible{
   outline:2px solid var(--ink);outline-offset:2px;
