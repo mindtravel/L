@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/board.css">
+<link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">∟</span>
+      <div>
+        <h1 id="gameName">L</h1>
+      </div>
+    </div>
+    <div class="turnpill" id="turnpill"><span class="swatch"></span><span id="turntext">黑方回合</span></div>
+  </header>
+
+  <main>
+    <section class="boardcard">
+      <div id="boardwrap">
+        <canvas id="board" tabindex="0" aria-label="L 棋盘"></canvas>
+        <div class="overlay" id="overlay" hidden>
+          <div class="box">
+            <div class="mark" id="ovEmoji">■</div>
+            <h2 id="ovTitle">黑方胜</h2>
+            <p id="ovSub">连成四格</p>
+            <div class="controls center">
+              <button class="primary" id="ovAgain">再来一局</button>
+              <button id="ovView">看看棋盘</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="axes">
+        <label><span>横向</span><input type="range" id="axisX" min="0" max="12" step="1" value="0" aria-label="横向接缝位置"><b id="axisXVal">0</b></label>
+        <label><span>纵向</span><input type="range" id="axisY" min="0" max="12" step="1" value="0" aria-label="纵向接缝位置"><b id="axisYVal">0</b></label>
+      </div>
+      <div class="hintline" id="hintline"></div>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <h3>局 面</h3>
+        <div class="scoreRow">
+          <div class="side p0" id="sideRed">
+            <div class="name"><i class="solid"></i>黑方</div>
+            <div class="stats"><span>种子</span><span class="pips" id="pipsRed"></span><span class="stat" id="cellRed">0 格</span></div>
+          </div>
+          <div class="side p1" id="sideBlue">
+            <div class="name"><i class="hollow"></i>白方</div>
+            <div class="stats"><span>种子</span><span class="pips" id="pipsBlue"></span><span class="stat" id="cellBlue">0 格</span></div>
+          </div>
+        </div>
+        <div class="controls mt">
+          <button class="primary" id="btnNew">新 局</button>
+          <button id="btnUndo">悔 棋</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>设 置</h3>
+        <div class="fields">
+          <span>模式</span>
+          <select id="selMode">
+            <option value="pvp">双人同机</option>
+            <option value="pve">人机 · 我执黑</option>
+            <option value="evp">人机 · 我执白</option>
+            <option value="eve">AI 自弈（观赏）</option>
+          </select>
+          <span>电脑</span>
+          <select id="selLevel">
+            <option value="1">随手</option>
+            <option value="2" selected>稳健</option>
+            <option value="3">凶狠</option>
+          </select>
+          <span>棋盘</span>
+          <select id="selSize">
+            <option value="13" selected>13 × 13 格</option>
+            <option value="15">15 × 15 格</option>
+            <option value="17">17 × 17 格</option>
+            <option value="19">19 × 19 格</option>
+            <option value="21">21 × 21 格</option>
+          </select>
+          <label class="chk"><input type="checkbox" id="chkHints" checked>显示可落子提示（H）</label>
+          <label class="chk"><input type="checkbox" id="chkSfx" checked>音效</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>着 法</h3>
+        <ol id="log"></ol>
+      </div>
+
+      <div class="card">
+        <details class="rules">
+          <summary>规 则 速 查</summary>
+          <div class="body">
+            <p><b>棋盘</b>：棋盘是固定尺寸的方格，边缘可以穿透到另一侧</p>
+            <p><b>下棋</b>：两方轮流下棋，下一步棋时，你可以在棋盘上画一个"L"，也就是「横一格＋竖一格」</p>
+            <p><b>胜利条件</b>：己方的所有棋子完整包围的格子在横、竖、斜任意方向连成 4 个，立即获胜；无路可走时判和。</p>
+            <p><b>落子限制</b>：下棋不能和已有棋子重叠；一般来说，落子必须和己方场上棋子连续，从独立区域下棋需要消耗一个“种子”（开局也算），种子每人三枚。</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3>操 作</h3>
+        <div class="note">
+          点一个<b>格点</b> → 四周亮起虚线折角 → 点其中之一落下（盘边那圈淡色的点也可以点）。<br>
+          实线＝续线（免费）　点线＝种子落子（消耗 1 枚种子）<br>
+          快捷键：<b>1–4</b> 落子，<b>Esc</b> 取消，<b>U</b> 悔棋，<b>R</b> 新局，<b>H</b> 提示。
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="foot">盘边首尾相连 · 折角成线 · 围合成格 · 连成四格者胜</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 依赖顺序：内核 → 基础 → 特效 → 视图 → 输入 → 启动 -->
+<script src="js/rules.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/util.js"></script>
+<script src="js/scheduler.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/board.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/input.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

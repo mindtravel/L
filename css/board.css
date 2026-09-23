@@ -1,0 +1,50 @@
+/* =====================================================================
+   直角 · 棋盘区
+   棋盘卡片、画布、底部提示、终局遮罩、提示条
+   ===================================================================== */
+
+.boardcard{
+  background:var(--paper);border:1px solid var(--ink);padding:12px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+#boardwrap{position:relative;width:100%;display:flex;justify-content:center}
+canvas{display:block;cursor:crosshair;touch-action:none;outline:1px solid var(--hair-2);outline-offset:0}
+
+/* 换接缝的两根滚动轴：1px 轨道 + 方块滑块 */
+.axes{width:100%;max-width:520px;display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.axes label{display:flex;align-items:center;gap:9px;font:10.5px/1 var(--mono);color:var(--ink-2);letter-spacing:.14em}
+.axes label span{width:2.6em;flex:none}
+.axes label b{width:1.8em;text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.axes input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:14px;background:transparent;cursor:pointer;margin:0}
+.axes input[type=range]:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.axes input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--hair-2)}
+.axes input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:14px;background:var(--ink);border:0;margin-top:-6.5px}
+.axes input[type=range]::-moz-range-track{height:1px;background:var(--hair-2)}
+.axes input[type=range]::-moz-range-thumb{width:9px;height:14px;background:var(--ink);border:0;border-radius:0}
+.hintline{font:11px/1.7 var(--mono);color:var(--ink-2);text-align:center;min-height:18px;letter-spacing:.02em}
+.hintline b{color:var(--ink);font-weight:600}
+
+/* ---------- 终局遮罩 ---------- */
+.overlay{
+  position:absolute;inset:0;display:grid;place-items:center;z-index:5;
+  background:rgba(255,255,255,.82);animation:fade .28s ease;
+}
+.overlay[hidden]{display:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.overlay .box{
+  background:#fff;border:2px solid var(--ink);padding:24px 34px;text-align:center;
+  animation:popIn .3s cubic-bezier(.2,.9,.3,1.25);
+}
+@keyframes popIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.overlay .mark{font-size:30px;line-height:1;font-family:var(--mono)}
+.overlay h2{margin:10px 0 2px;font-size:21px;letter-spacing:.2em}
+.overlay p{margin:0 0 16px;font:11px/1.6 var(--mono);color:var(--ink-2);letter-spacing:.14em}
+
+/* ---------- 轻提示条 ---------- */
+.toast{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,calc(-50% + 8px));
+  background:var(--ink);color:#fff;padding:9px 16px;font:12px/1 var(--mono);letter-spacing:.1em;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;
+  max-width:min(90vw,520px);text-align:center;white-space:normal;
+}
+.toast.on{opacity:1;transform:translate(-50%,-50%)}

@@ -1,0 +1,90 @@
+/* =====================================================================
+   直角 · 侧栏
+   局面比数、设置控件、着法记录、规则速查
+   ===================================================================== */
+
+.panel{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--paper);border:1px solid var(--hair-2);padding:13px 15px}
+.card h3{
+  margin:0 0 11px;padding-bottom:7px;border-bottom:1px solid var(--hair);
+  font:600 10.5px/1 var(--mono);letter-spacing:.28em;color:var(--ink-2);text-transform:uppercase;
+}
+
+/* ---------- 双方比数 ---------- */
+.scoreRow{display:flex;gap:8px}
+.side{flex:1;border:1px solid var(--hair-2);padding:8px 10px;transition:border-color .2s,background .2s}
+.side.active{border-color:var(--ink);background:#fafafa}
+.side .name{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px;letter-spacing:.06em}
+.side .name i{width:11px;height:11px;border:1.5px solid var(--ink);display:inline-block}
+.side .name i.solid{background:var(--ink)}
+.side .name i.hollow{background:#fff}
+.side .stats{margin-top:6px;font:11px/1.6 var(--mono);color:var(--ink-2);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+
+/* 起笔次数：小方块，用掉一枚时弹一下 */
+.pips{display:inline-flex;gap:3px}
+.pips span{width:8px;height:8px;border:1px solid var(--ink-3);background:#fff;transition:background .2s,border-color .2s}
+.side .pips span.on{background:var(--ink);border-color:var(--ink)}
+.side .pips span.pop{animation:pipPop .5s ease}
+@keyframes pipPop{0%{transform:scale(2.2);background:var(--ink)}70%{opacity:.45}100%{transform:scale(1)}}
+
+/* 成格数：数字变化时弹一下 */
+.stat{display:inline-block}
+.stat.bump{animation:bump .34s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* ---------- 控件 ---------- */
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+.controls.mt{margin-top:12px}
+.controls.center{justify-content:center}
+button{
+  font:12.5px/1 var(--mono);letter-spacing:.08em;cursor:pointer;
+  padding:9px 14px;border:1px solid var(--ink);background:#fff;color:var(--ink);
+  transition:background .14s,color .14s;
+}
+button:hover:not(:disabled){background:var(--ink);color:#fff}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.32;cursor:not-allowed}
+button.primary{background:var(--ink);color:#fff}
+button.primary:hover:not(:disabled){background:#fff;color:var(--ink)}
+
+.fields{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;font:11.5px/1 var(--mono);color:var(--ink-2)}
+select{
+  font:12px/1 var(--mono);padding:7px 8px;border:1px solid var(--hair-2);
+  background:#fff;color:var(--ink);width:100%;border-radius:0;
+}
+select:hover{border-color:var(--ink)}
+label.chk{display:flex;align-items:center;gap:7px;font:11.5px/1 var(--mono);color:var(--ink-2);cursor:pointer;grid-column:1/-1}
+label.chk input{accent-color:var(--ink)}
+
+/* ---------- 着法记录 ---------- */
+#log{list-style:none;margin:0;padding:0;max-height:236px;overflow:auto;font:11.5px/1.5 var(--mono)}
+#log::-webkit-scrollbar{width:8px}
+#log::-webkit-scrollbar-thumb{background:var(--hair-2)}
+#log::-webkit-scrollbar-track{background:transparent}
+#log li{padding:5px 2px;display:flex;gap:8px;align-items:baseline;border-bottom:1px solid var(--hair)}
+#log li:last-child{border-bottom:0}
+#log li.new{animation:logIn .36s ease}
+@keyframes logIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+#log li .n{color:var(--ink-3);min-width:20px;text-align:right}
+#log li .tag{font-weight:700;letter-spacing:.06em}
+#log li.p1 .tag{color:var(--ink-2)}
+#log li .desc{color:var(--ink-2)}
+#log li .claim{font-weight:700;border-bottom:1px solid var(--ink)}
+
+/* ---------- 规则速查 ---------- */
+details.rules summary{
+  cursor:pointer;font:600 10.5px/1 var(--mono);letter-spacing:.28em;color:var(--ink-2);
+  text-transform:uppercase;outline:none;list-style:none;
+}
+details.rules summary::-webkit-details-marker{display:none}
+details.rules summary::before{content:'+ ';color:var(--ink-3)}
+details.rules[open] summary::before{content:'− '}
+details.rules .body{margin-top:12px;font-size:12.5px;color:#3d3d3d}
+details.rules .body p{margin:7px 0}
+details.rules .body b{color:var(--ink)}
+details.rules .body p.dim{color:var(--ink-2)}
+.vocab{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font:11px/1.5 var(--mono);margin:10px 0 0;padding-top:10px;border-top:1px solid var(--hair)}
+.vocab dt{font-weight:700;white-space:nowrap;margin:0}
+.vocab dd{margin:0;color:var(--ink-2)}
+.note{font-size:12.5px;color:#3d3d3d}
+.note b{color:var(--ink)}

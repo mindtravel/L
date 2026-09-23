@@ -1,0 +1,14 @@
+{
+  "name": "l-four",
+  "version": "1.0.0",
+  "private": true,
+  "description": "L：方格纸上的折角对弈",
+  "scripts": {
+    "test": "node test/rules.test.js && node test/ui.smoke.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "license": "MIT"
+}

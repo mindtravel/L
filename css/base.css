@@ -1,0 +1,79 @@
+/* =====================================================================
+   直角 · 基础层
+   设计变量、排版、页面骨架（顶栏 / 两栏布局 / 页脚）
+   全局约定：无彩色、无圆角、无阴影，只用发丝线 + 黑 + 白 + 灰。
+   ===================================================================== */
+
+:root{
+  --ink:#111111;
+  --ink-2:#6f6f6f;
+  --ink-3:#a6a6a6;
+  --hair:#e4e4e4;
+  --hair-2:#d0d0d0;
+  --paper:#ffffff;
+  --bg:#f6f6f6;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--hair) 1px, transparent 1px);
+  background-size:16px 16px;
+  color:var(--ink);
+  font:14px/1.6 "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+.app{max-width:1080px;margin:0 auto;padding:20px 18px 44px}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--ink);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{
+  width:44px;height:44px;display:grid;place-items:center;
+  border:1px solid var(--ink);font:600 26px/1 var(--mono);padding-bottom:6px;color:var(--ink);
+}
+.brand h1{margin:0;font-size:24px;font-weight:700;letter-spacing:.22em}
+.brand p{margin:2px 0 0;font:11px/1.5 var(--mono);color:var(--ink-2);letter-spacing:.14em;text-transform:uppercase}
+
+/* 回合指示：方块色块用「实心 / 空心」区分双方 */
+.turnpill{
+  display:flex;align-items:center;gap:9px;padding:7px 14px;
+  border:1px solid var(--ink);background:var(--paper);
+  font:12px/1 var(--mono);letter-spacing:.14em;
+}
+.turnpill .swatch{width:12px;height:12px;border:1px solid var(--ink);background:transparent;transition:background .2s}
+.turnpill.p0 .swatch{background:var(--ink)}
+.turnpill.p1 .swatch{background:#fff}
+.turnpill.over{border-width:2px}
+.turnpill.thinking #turntext::after{content:'···';letter-spacing:2px;animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ---------- 两栏布局 ---------- */
+main{display:grid;grid-template-columns:minmax(320px,1fr) 340px;gap:18px;align-items:start}
+@media (max-width:880px){ main{grid-template-columns:1fr} }
+
+/* ---------- 页脚 ---------- */
+.foot{
+  font:10.5px/1.8 var(--mono);color:var(--ink-3);text-align:center;letter-spacing:.14em;
+  margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);
+}
+
+/* ---------- 键盘可达性 ---------- */
+button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visible,canvas:focus-visible{
+  outline:2px solid var(--ink);outline-offset:2px;
+}
+
+/* ---------- 尊重系统的「减弱动态效果」 ---------- */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
