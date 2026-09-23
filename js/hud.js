@@ -69,6 +69,13 @@
     var thinking = ZJ.game.thinking();
     var players = ZJ.game.players();
     var selected = ZJ.board.selected();
+    var meta = U.$('sessionMeta');
+    if (meta) {
+      var modeText = { pvp: '双人同机', pve: '人机 · 执黑', evp: '人机 · 执白', eve: 'AI 自弈', online: '联机对弈' }[cfg.mode] || cfg.mode;
+      var detail = cfg.mode === 'online' && ZJ.online && ZJ.online.room() ? ' · 房间 ' + ZJ.online.room() : '';
+      if (cfg.mode !== 'pvp' && cfg.mode !== 'online') detail += ' · 强度 ' + cfg.level;
+      meta.textContent = modeText + detail;
+    }
 
     /* 回合指示 */
     var pill = U.$('turnpill'), txt = U.$('turntext');

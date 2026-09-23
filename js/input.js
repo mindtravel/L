@@ -124,16 +124,21 @@
     U.$('selMode').addEventListener('change', function () {
       ZJ.game.cfg.mode = this.value;
       U.$('roomControls').hidden = this.value !== 'online';
+      ZJ.hud.refresh();
     });
     U.$('selMode').addEventListener('change', function () { if (this.value === 'online') ZJ.hud.toast('请创建房间或输入房间号加入'); });
     U.$('btnStartGame').addEventListener('click', function () {
+      if (ZJ.game.cfg.mode === 'online') {
+        ZJ.hud.toast('请先创建房间或加入房间');
+        return;
+      }
       U.$('startScreen').hidden = true;
       ZJ.game.newGame();
     });
     U.$('btnCreateRoom').addEventListener('click', function () { ZJ.online.create(); });
     U.$('btnJoinRoom').addEventListener('click', function () { ZJ.online.join(U.$('roomIdInput').value.trim()); });
     U.$('selSize').addEventListener('change', function () { ZJ.game.cfg.size = +this.value; ZJ.game.newGame(); });
-    U.$('selLevel').addEventListener('change', function () { ZJ.game.cfg.level = +this.value; });
+    U.$('selLevel').addEventListener('change', function () { ZJ.game.cfg.level = +this.value; ZJ.hud.refresh(); });
 
     U.$('chkHints').addEventListener('change', function () { setHints(this.checked); });
     U.$('chkSfx').addEventListener('change', function () {
