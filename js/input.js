@@ -122,6 +122,13 @@
     U.$('ovView').addEventListener('click', function () { ZJ.hud.hideOverlay(); });
 
     U.$('selMode').addEventListener('change', function () { ZJ.game.cfg.mode = this.value; ZJ.game.newGame(); });
+    U.$('selMode').addEventListener('change', function () {
+      var online = this.value === 'online';
+      U.$('roomControls').hidden = !online;
+      if (online) ZJ.hud.toast('请创建房间或输入房间号加入');
+    });
+    U.$('btnCreateRoom').addEventListener('click', function () { ZJ.online.create(); });
+    U.$('btnJoinRoom').addEventListener('click', function () { ZJ.online.join(U.$('roomIdInput').value.trim()); });
     U.$('selSize').addEventListener('change', function () { ZJ.game.cfg.size = +this.value; ZJ.game.newGame(); });
     U.$('selLevel').addEventListener('change', function () { ZJ.game.cfg.level = +this.value; });
 

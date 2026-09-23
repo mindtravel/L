@@ -72,6 +72,7 @@
             <option value="pve">人机 · 我执黑</option>
             <option value="evp">人机 · 我执白</option>
             <option value="eve">AI 自弈（观赏）</option>
+            <option value="online">联机对弈</option>
           </select>
           <span>电脑</span>
           <select id="selLevel">
@@ -89,6 +90,12 @@
           </select>
           <label class="chk"><input type="checkbox" id="chkHints" checked>显示可落子提示（H）</label>
           <label class="chk"><input type="checkbox" id="chkSfx" checked>音效</label>
+        </div>
+        <div class="room-controls" id="roomControls" hidden>
+          <button id="btnCreateRoom">创建房间</button>
+          <input id="roomIdInput" maxlength="8" placeholder="房间号" aria-label="房间号">
+          <button id="btnJoinRoom">加入</button>
+          <small id="roomStatus">未连接</small>
         </div>
       </div>
 
@@ -137,5 +144,6 @@
 <script src="js/hud.js"></script>
 <script src="js/input.js"></script>
 <script src="js/game.js"></script>
+<script src="js/online.js"></script>
 </body>
 </html>

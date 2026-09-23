@@ -24,10 +24,12 @@
   var legal = new Set();         // 合法角点 "x,y"
   var thinking = false;
   var aiToken = 0, aiTimer = null, lastMoveAt = -1e9;
+  var onlinePlayer = null;
 
   /* ---------------- 只读接口 ---------------- */
 
   function players() {
+    if (cfg.mode === 'online') return ['human', 'human'];
     if (cfg.mode === 'pvp') return ['human', 'human'];
     if (cfg.mode === 'pve') return ['human', 'ai'];
     if (cfg.mode === 'evp') return ['ai', 'human'];
@@ -35,7 +37,9 @@
   }
 
   function isHumanTurn() {
-    return !!state && state.winner == null && !thinking && players()[state.turn] === 'human';
+    if (!state || state.winner != null || thinking) return false;
+    if (cfg.mode === 'online') return onlinePlayer != null && state.turn === onlinePlayer;
+    return players()[state.turn] === 'human';
   }
 
   function refreshLegal() {
@@ -54,7 +58,15 @@
       ZJ.sfx.bad();
       return;
     }
+    if (cfg.mode === 'online') { ZJ.online.move(x, y, q); return; }
     doMove(m);
+  }
+
+  function applyOnlineState(snapshot) {
+    state = R.hydrateState(snapshot); history = []; records = [];
+    if (state.lastMove) records.push(state.lastMove);
+    refreshLegal(); ZJ.hud.renderLog(records); ZJ.hud.refresh();
+    ZJ.board.layout(); ZJ.board.invalidate(600);
   }
 
   function doMove(m) {
@@ -135,7 +147,7 @@
     refreshLegal();
     ZJ.hud.refresh();
     ZJ.board.invalidate(500);
-    maybeAI();
+    if (cfg.mode !== 'online') maybeAI();
   }
 
   function undo() {
@@ -201,6 +213,9 @@
     tryMove: tryMove,
     undo: undo,
     newGame: newGame,
+    setOnlinePlayer: function (p) { onlinePlayer = p; },
+    onlinePlayer: function () { return onlinePlayer; },
+    applyOnlineState: applyOnlineState,
     boot: boot
   };
 

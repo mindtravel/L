@@ -68,6 +68,15 @@
     };
   }
 
+  function hydrateState(data) {
+    var s = createGame(data.W, data.H, data.seedsPerPlayer == null ? 3 : data.seedsPerPlayer);
+    if (data.h) s.h.set(data.h); if (data.v) s.v.set(data.v); if (data.cell) s.cell.set(data.cell);
+    s.seeds = (data.seeds || s.seeds).slice(); s.seedMarks = (data.seedMarks || []).slice();
+    s.turn = data.turn; s.moveCount = data.moveCount || 0; s.lastMove = data.lastMove || null;
+    s.winner = data.winner == null ? null : data.winner; s.winLine = data.winLine || null;
+    return s;
+  }
+
   /* ------------------------------------------------------------------ */
   /* 线段与格点的基础读写                                                */
   /* ------------------------------------------------------------------ */
@@ -334,7 +343,7 @@
   return {
     EMPTY: EMPTY, RED: RED, BLUE: BLUE, DRAW: DRAW,
     ORIENTATIONS: ORIENTATIONS, DIRS4: DIRS4,
-    createGame: createGame, cloneState: cloneState,
+    createGame: createGame, cloneState: cloneState, hydrateState: hydrateState,
     validateMove: validateMove, moveError: moveError, legalMoves: legalMoves, applyMove: applyMove,
     edgeValid: edgeValid, edgeOwner: edgeOwner, setEdgeOwner: setEdgeOwner,
     armEdge: armEdge, vertexEdges: vertexEdges,

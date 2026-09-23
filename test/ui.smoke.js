@@ -108,7 +108,7 @@ if (loadErr) { console.log(loadErr.stack); process.exit(1); }
 
 const ZJ = windowStub.ZJ;
 ok(!!ZJ, '挂在 window.ZJ 命名空间下');
-const MODS = ['rules', 'ai', 'theme', 'util', 'scheduler', 'fx', 'sfx', 'board', 'hud', 'input', 'game'];
+const MODS = ['rules', 'ai', 'theme', 'util', 'scheduler', 'fx', 'sfx', 'board', 'hud', 'input', 'game', 'online'];
 const lost = MODS.filter(m => !ZJ || !ZJ[m]);
 ok(lost.length === 0, '十个模块各就各位' + (lost.length ? '：缺 ' + lost.join(', ') : ''));
 ok(typeof windowStub.VineRules === 'undefined' && typeof windowStub.VineAI === 'undefined',

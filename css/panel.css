@@ -34,6 +34,9 @@
 
 /* ---------- 控件 ---------- */
 .controls{display:flex;flex-wrap:wrap;gap:8px}
+.room-controls{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center;margin-top:10px}
+.room-controls input{min-width:0;border:1px solid var(--hair-2);padding:6px 8px;font:12px var(--mono);background:var(--paper)}
+.room-controls small{grid-column:1/-1;color:var(--ink-2);font:11px var(--mono)}
 .controls.mt{margin-top:12px}
 .controls.center{justify-content:center}
 button{

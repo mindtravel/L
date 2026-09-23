@@ -23,7 +23,8 @@ function publicState(room) {
   return {
     W: s.W, H: s.H, turn: s.turn, winner: s.winner,
     moveCount: s.moveCount, seeds: s.seeds,
-    cell: Array.from(s.cell), lastMove: s.lastMove
+    h: Array.from(s.h), v: Array.from(s.v), cell: Array.from(s.cell),
+    seedMarks: s.seedMarks, winLine: s.winLine, lastMove: s.lastMove
   };
 }
 
