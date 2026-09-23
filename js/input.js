@@ -122,8 +122,11 @@
     U.$('ovView').addEventListener('click', function () { ZJ.hud.hideOverlay(); });
 
     U.$('selMode').addEventListener('change', function () {
+      var isAI = this.value === 'pve' || this.value === 'evp' || this.value === 'eve';
       ZJ.game.cfg.mode = this.value;
       U.$('roomControls').hidden = this.value !== 'online';
+      U.$('levelLabel').hidden = !isAI;
+      U.$('selLevel').hidden = !isAI;
       ZJ.hud.refresh();
     });
     U.$('selMode').addEventListener('change', function () { if (this.value === 'online') ZJ.hud.toast('请创建房间或输入房间号加入'); });
