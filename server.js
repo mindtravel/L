@@ -111,7 +111,7 @@ wss.on('connection', ws => {
   ws.on('close', () => {
     const room = ws.room;
     if (!room) return;
-    if (ws.slot != null && room.players[ws.slot]) room.players[ws.slot].ws = null;
+    if (ws.slot != null && room.players[ws.slot] && room.players[ws.slot].ws === ws) room.players[ws.slot].ws = null;
     room.viewers = room.viewers.filter(viewer => viewer !== ws);
     broadcast(room, 'presence', { players: room.players.filter(player => player && player.ws).length });
     if (!room.players.some(player => player && player.ws) && !room.viewers.length) {
