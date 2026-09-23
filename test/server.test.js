@@ -36,6 +36,7 @@ async function main() {
   b.send(JSON.stringify({ type: 'join', roomId: created.roomId }));
   const joined = await waitFor(b, 'joined');
   assert.strictEqual(joined.player, 1);
+  const reconnectToken = joined.token;
 
   const acceptedA = waitFor(a, 'moveAccepted');
   const acceptedB = waitFor(b, 'moveAccepted');
@@ -45,17 +46,26 @@ async function main() {
   assert.strictEqual(moveB.state.moveCount, 1);
   assert.strictEqual(moveB.state.records.length, 1);
 
-  b.send(JSON.stringify({ type: 'move', x: 5, y: 5, q: 1, version: 1 }));
+  b.close();
+  await new Promise(resolve => setTimeout(resolve, 50));
+  const reconnected = new WebSocket('ws://127.0.0.1:' + port);
+  await new Promise(resolve => reconnected.once('open', resolve));
+  reconnected.send(JSON.stringify({ type: 'join', roomId: created.roomId, token: reconnectToken }));
+  const rejoined = await waitFor(reconnected, 'joined');
+  assert.strictEqual(rejoined.player, 1);
+  assert.strictEqual(rejoined.state.moveCount, 1);
+
+  reconnected.send(JSON.stringify({ type: 'move', x: 5, y: 5, q: 1, version: 1 }));
   const move2 = await waitFor(a, 'moveAccepted');
   assert.strictEqual(move2.version, 2);
   assert.strictEqual(move2.state.records.length, 2);
 
-  const reset = waitFor(b, 'state');
+  const reset = waitFor(reconnected, 'state');
   a.send(JSON.stringify({ type: 'reset' }));
   const resetState = await reset;
   assert.strictEqual(resetState.state.moveCount, 0);
   assert.strictEqual(resetState.state.records.length, 0);
-  a.close(); b.close(); child.kill();
+  a.close(); reconnected.close(); child.kill();
   console.log('WebSocket integration: passed');
 }
 

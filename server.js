@@ -18,6 +18,8 @@ function roomId() {
   return crypto.randomBytes(4).toString('base64url').toUpperCase();
 }
 
+function playerToken() { return crypto.randomBytes(18).toString('base64url'); }
+
 function publicState(room) {
   const s = room.state;
   return {
@@ -34,19 +36,21 @@ function send(ws, type, payload) {
 }
 
 function broadcast(room, type, payload) {
-  for (const player of room.players) if (player) send(player.ws, type, payload);
+  for (const player of room.players) if (player && player.ws) send(player.ws, type, payload);
   for (const viewer of room.viewers) send(viewer, type, payload);
 }
 
-function joinRoom(ws, id) {
+function joinRoom(ws, id, reconnectToken) {
   const room = rooms.get(String(id || '').toUpperCase());
   if (!room) return send(ws, 'error', { code: 'ROOM_NOT_FOUND', message: '房间不存在' });
-  const slot = room.players[0] ? (room.players[1] ? -1 : 1) : 0;
+  const returning = room.players.find(player => player && player.token === reconnectToken && !player.ws);
+  const slot = returning ? returning.slot : (room.players[0] ? (room.players[1] ? -1 : 1) : 0);
   if (slot < 0) return send(ws, 'error', { code: 'ROOM_FULL', message: '房间已满' });
-  room.players[slot] = { ws, slot };
+  const token = returning ? returning.token : playerToken();
+  room.players[slot] = { ws, slot, token };
   ws.room = room; ws.slot = slot;
-  send(ws, 'joined', { roomId: room.id, player: slot, status: room.players.some(Boolean) && room.players[1] ? 'playing' : 'waiting', state: publicState(room) });
-  broadcast(room, 'presence', { players: room.players.map(Boolean).length });
+  send(ws, 'joined', { roomId: room.id, player: slot, token, status: room.players[0] && room.players[0].ws && room.players[1] && room.players[1].ws ? 'playing' : 'waiting', state: publicState(room) });
+  broadcast(room, 'presence', { players: room.players.filter(player => player && player.ws).length });
 }
 
 function createRoom(ws, requestedSize) {
@@ -55,15 +59,16 @@ function createRoom(ws, requestedSize) {
   const size = [13, 15, 17, 19, 21].includes(Number(requestedSize)) ? Number(requestedSize) : 13;
   const room = { id, state: rules.createGame(size, size, 3), records: [], version: 0, players: [], viewers: [] };
   rooms.set(id, room);
-  room.players[0] = { ws, slot: 0 };
+  const token = playerToken();
+  room.players[0] = { ws, slot: 0, token };
   ws.room = room; ws.slot = 0;
-  send(ws, 'created', { roomId: id, player: 0, status: 'waiting', state: publicState(room) });
+  send(ws, 'created', { roomId: id, player: 0, token, status: 'waiting', state: publicState(room) });
 }
 
 function handle(ws, msg) {
   if (!msg || typeof msg.type !== 'string') return;
   if (msg.type === 'create') return createRoom(ws, msg.size);
-  if (msg.type === 'join') return joinRoom(ws, msg.roomId);
+  if (msg.type === 'join') return joinRoom(ws, msg.roomId, msg.token);
   const room = ws.room;
   if (!room) return send(ws, 'error', { code: 'NOT_IN_ROOM', message: '请先创建或加入房间' });
   if (msg.type === 'state') return send(ws, 'state', { version: room.version, state: publicState(room) });
@@ -106,10 +111,12 @@ wss.on('connection', ws => {
   ws.on('close', () => {
     const room = ws.room;
     if (!room) return;
-    if (ws.slot != null) room.players[ws.slot] = null;
+    if (ws.slot != null && room.players[ws.slot]) room.players[ws.slot].ws = null;
     room.viewers = room.viewers.filter(viewer => viewer !== ws);
-    broadcast(room, 'presence', { players: room.players.map(Boolean).length });
-    if (!room.players.some(Boolean) && !room.viewers.length) rooms.delete(room.id);
+    broadcast(room, 'presence', { players: room.players.filter(player => player && player.ws).length });
+    if (!room.players.some(player => player && player.ws) && !room.viewers.length) {
+      setTimeout(() => { if (rooms.get(room.id) === room && !room.players.some(player => player && player.ws)) rooms.delete(room.id); }, 30 * 60 * 1000);
+    }
   });
 });
 server.listen(PORT, () => console.log(`L server listening on http://localhost:${PORT}`));
