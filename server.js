@@ -24,7 +24,8 @@ function publicState(room) {
     W: s.W, H: s.H, turn: s.turn, winner: s.winner,
     moveCount: s.moveCount, seeds: s.seeds,
     h: Array.from(s.h), v: Array.from(s.v), cell: Array.from(s.cell),
-    seedMarks: s.seedMarks, winLine: s.winLine, lastMove: s.lastMove
+    seedMarks: s.seedMarks, winLine: s.winLine, lastMove: s.lastMove,
+    version: room.version
   };
 }
 
@@ -44,18 +45,18 @@ function joinRoom(ws, id) {
   if (slot < 0) return send(ws, 'error', { code: 'ROOM_FULL', message: '房间已满' });
   room.players[slot] = { ws, slot };
   ws.room = room; ws.slot = slot;
-  send(ws, 'joined', { roomId: room.id, player: slot, state: publicState(room) });
+  send(ws, 'joined', { roomId: room.id, player: slot, status: room.players.some(Boolean) && room.players[1] ? 'playing' : 'waiting', state: publicState(room) });
   broadcast(room, 'presence', { players: room.players.map(Boolean).length });
 }
 
 function createRoom(ws) {
   let id;
   do id = roomId(); while (rooms.has(id));
-  const room = { id, state: rules.createGame(13, 13, 3), players: [], viewers: [] };
+  const room = { id, state: rules.createGame(13, 13, 3), version: 0, players: [], viewers: [] };
   rooms.set(id, room);
   room.players[0] = { ws, slot: 0 };
   ws.room = room; ws.slot = 0;
-  send(ws, 'created', { roomId: id, player: 0, state: publicState(room) });
+  send(ws, 'created', { roomId: id, player: 0, status: 'waiting', state: publicState(room) });
 }
 
 function handle(ws, msg) {
@@ -68,15 +69,18 @@ function handle(ws, msg) {
   if (msg.type === 'reset') {
     if (ws.slot !== 0) return send(ws, 'error', { code: 'FORBIDDEN', message: '只有房主可以重开' });
     room.state = rules.createGame(room.state.W, room.state.H, room.state.seedsPerPlayer);
-    return broadcast(room, 'state', { state: publicState(room) });
+    room.version += 1;
+    return broadcast(room, 'state', { version: room.version, state: publicState(room) });
   }
   if (msg.type !== 'move') return;
   if (room.state.winner != null) return send(ws, 'error', { code: 'GAME_OVER', message: '本局已经结束' });
   if (room.state.turn !== ws.slot) return send(ws, 'error', { code: 'NOT_YOUR_TURN', message: '还没轮到你' });
+  if (Number(msg.version) !== room.version) return send(ws, 'sync', { version: room.version, state: publicState(room) });
   const move = rules.validateMove(room.state, Number(msg.x), Number(msg.y), Number(msg.q));
   if (!move) return send(ws, 'error', { code: 'ILLEGAL_MOVE', message: '这一步不合法' });
   const record = rules.applyMove(room.state, move);
-  broadcast(room, 'move', { move: record, state: publicState(room) });
+  room.version += 1;
+  broadcast(room, 'moveAccepted', { version: room.version, move: record, state: publicState(room) });
 }
 
 function serve(req, res) {

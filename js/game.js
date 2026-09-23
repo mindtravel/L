@@ -62,10 +62,15 @@
     doMove(m);
   }
 
-  function applyOnlineState(snapshot) {
+  function applyOnlineState(snapshot, meta) {
     state = R.hydrateState(snapshot); history = []; records = [];
     if (state.lastMove) records.push(state.lastMove);
+    if (meta && meta.move && state.lastMove && ZJ.fx) {
+      ZJ.fx.edgeGrow(state.lastMove);
+      if (state.lastMove.isSeed) ZJ.fx.seedRing(state.lastMove.x, state.lastMove.y, state.lastMove.player);
+    }
     refreshLegal(); ZJ.hud.renderLog(records); ZJ.hud.refresh();
+    ZJ.board.select(null); ZJ.board.setHover(null); ZJ.board.setQuadrant(-1);
     ZJ.board.layout(); ZJ.board.invalidate(600);
   }
 
