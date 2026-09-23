@@ -4,7 +4,7 @@
   "private": true,
   "description": "L：方格纸上的折角对弈",
   "scripts": {
-    "test": "node test/rules.test.js && node test/ui.smoke.js",
+    "test": "node test/rules.test.js && node test/ui.smoke.js && node test/server.test.js",
     "start": "node server.js"
   },
   "dependencies": {
