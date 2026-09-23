@@ -63,11 +63,17 @@
   }
 
   function applyOnlineState(snapshot, meta) {
+    var previous = state;
     state = R.hydrateState(snapshot); history = []; records = [];
-    if (state.lastMove) records.push(state.lastMove);
+    records = snapshot.records ? snapshot.records.slice() : (state.lastMove ? [state.lastMove] : []);
     if (meta && meta.move && state.lastMove && ZJ.fx) {
       ZJ.fx.edgeGrow(state.lastMove);
       if (state.lastMove.isSeed) ZJ.fx.seedRing(state.lastMove.x, state.lastMove.y, state.lastMove.player);
+    }
+    if (previous && previous.winner == null && state.winner != null) {
+      if (state.winner === R.DRAW) ZJ.sfx.draw();
+      else { ZJ.fx.winBurst(state.winLine, state.winner); ZJ.sfx.win(); }
+      ZJ.hud.scheduleOverlay(cfg.overlayDelay);
     }
     refreshLegal(); ZJ.hud.renderLog(records); ZJ.hud.refresh();
     ZJ.board.select(null); ZJ.board.setHover(null); ZJ.board.setQuadrant(-1);
@@ -134,6 +140,10 @@
   /* ---------------- 开局 / 悔棋 ---------------- */
 
   function newGame() {
+    if (cfg.mode === 'online' && ZJ.online && ZJ.online.room()) {
+      ZJ.online.reset();
+      return;
+    }
     state = R.createGame(cfg.size, cfg.size, cfg.seeds);
     history = []; records = [];
     thinking = false;

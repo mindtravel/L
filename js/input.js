@@ -138,7 +138,7 @@
       U.$('startScreen').hidden = true;
       ZJ.game.newGame();
     });
-    U.$('btnCreateRoom').addEventListener('click', function () { ZJ.online.create(); });
+    U.$('btnCreateRoom').addEventListener('click', function () { ZJ.online.create(ZJ.game.cfg.size); });
     U.$('btnJoinRoom').addEventListener('click', function () { ZJ.online.join(U.$('roomIdInput').value.trim()); });
     U.$('selSize').addEventListener('change', function () { ZJ.game.cfg.size = +this.value; ZJ.game.newGame(); });
     U.$('selLevel').addEventListener('change', function () { ZJ.game.cfg.level = +this.value; ZJ.hud.refresh(); });

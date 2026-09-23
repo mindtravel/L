@@ -74,6 +74,7 @@
     s.seeds = (data.seeds || s.seeds).slice(); s.seedMarks = (data.seedMarks || []).slice();
     s.turn = data.turn; s.moveCount = data.moveCount || 0; s.lastMove = data.lastMove || null;
     s.winner = data.winner == null ? null : data.winner; s.winLine = data.winLine || null;
+    s.version = data.version == null ? 0 : data.version;
     return s;
   }
 

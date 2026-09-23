@@ -25,7 +25,7 @@ function publicState(room) {
     moveCount: s.moveCount, seeds: s.seeds,
     h: Array.from(s.h), v: Array.from(s.v), cell: Array.from(s.cell),
     seedMarks: s.seedMarks, winLine: s.winLine, lastMove: s.lastMove,
-    version: room.version
+    version: room.version, records: room.records
   };
 }
 
@@ -49,10 +49,11 @@ function joinRoom(ws, id) {
   broadcast(room, 'presence', { players: room.players.map(Boolean).length });
 }
 
-function createRoom(ws) {
+function createRoom(ws, requestedSize) {
   let id;
   do id = roomId(); while (rooms.has(id));
-  const room = { id, state: rules.createGame(13, 13, 3), version: 0, players: [], viewers: [] };
+  const size = [13, 15, 17, 19, 21].includes(Number(requestedSize)) ? Number(requestedSize) : 13;
+  const room = { id, state: rules.createGame(size, size, 3), records: [], version: 0, players: [], viewers: [] };
   rooms.set(id, room);
   room.players[0] = { ws, slot: 0 };
   ws.room = room; ws.slot = 0;
@@ -61,24 +62,27 @@ function createRoom(ws) {
 
 function handle(ws, msg) {
   if (!msg || typeof msg.type !== 'string') return;
-  if (msg.type === 'create') return createRoom(ws);
+  if (msg.type === 'create') return createRoom(ws, msg.size);
   if (msg.type === 'join') return joinRoom(ws, msg.roomId);
   const room = ws.room;
   if (!room) return send(ws, 'error', { code: 'NOT_IN_ROOM', message: '请先创建或加入房间' });
-  if (msg.type === 'state') return send(ws, 'state', { state: publicState(room) });
+  if (msg.type === 'state') return send(ws, 'state', { version: room.version, state: publicState(room) });
   if (msg.type === 'reset') {
     if (ws.slot !== 0) return send(ws, 'error', { code: 'FORBIDDEN', message: '只有房主可以重开' });
     room.state = rules.createGame(room.state.W, room.state.H, room.state.seedsPerPlayer);
+    room.records = [];
     room.version += 1;
     return broadcast(room, 'state', { version: room.version, state: publicState(room) });
   }
   if (msg.type !== 'move') return;
   if (room.state.winner != null) return send(ws, 'error', { code: 'GAME_OVER', message: '本局已经结束' });
+  if (!room.players[0] || !room.players[1]) return send(ws, 'error', { code: 'WAITING_FOR_PLAYER', message: '等待另一位玩家加入' });
   if (room.state.turn !== ws.slot) return send(ws, 'error', { code: 'NOT_YOUR_TURN', message: '还没轮到你' });
   if (Number(msg.version) !== room.version) return send(ws, 'sync', { version: room.version, state: publicState(room) });
   const move = rules.validateMove(room.state, Number(msg.x), Number(msg.y), Number(msg.q));
   if (!move) return send(ws, 'error', { code: 'ILLEGAL_MOVE', message: '这一步不合法' });
   const record = rules.applyMove(room.state, move);
+  room.records.push(record);
   room.version += 1;
   broadcast(room, 'moveAccepted', { version: room.version, move: record, state: publicState(room) });
 }

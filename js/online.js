@@ -30,7 +30,7 @@
     socket.onmessage = function (ev) { try { handle(JSON.parse(ev.data)); } catch (_) { status('服务器消息无效'); } };
   }
   ZJ.online = {
-    create: function () { connect(); var m = { type: 'create' }; if (socket && socket.readyState === 1) send(m); else pending = m; },
+    create: function (size) { connect(); var m = { type: 'create', size: Number(size) || 13 }; if (socket && socket.readyState === 1) send(m); else pending = m; },
     join: function (id) { connect(); var m = { type: 'join', roomId: String(id || '').trim() }; if (socket && socket.readyState === 1) send(m); else pending = m; },
     move: function (x, y, q) { return send({ type: 'move', x: x, y: y, q: q, version: version }); },
     reset: function () { return send({ type: 'reset' }); }, room: function () { return roomId; }, player: function () { return player; }, version: function () { return version; }
