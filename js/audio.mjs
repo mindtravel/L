@@ -5,16 +5,12 @@
  * 黑方音高略高、白方略低，闭着眼也能听出是谁落的子。
  * 浏览器不支持 WebAudio（或没开音效）时，所有方法都是空操作。
  * ===================================================================== */
-(function (root) {
-  'use strict';
-
-  var ZJ = root.ZJ = root.ZJ || {};
-
+export function createAudio(windowRef = globalThis) {
   var ac = null;
 
   function audio() {
-    if (!ZJ.sfx.enabled) return null;
-    var AC = root.AudioContext || root.webkitAudioContext;
+    if (!api.enabled) return null;
+    var AC = windowRef.AudioContext || windowRef.webkitAudioContext;
     if (!AC) return null;
     if (!ac) { try { ac = new AC(); } catch (e) { return null; } }
     if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
@@ -37,7 +33,7 @@
     } catch (e) {}
   }
 
-  ZJ.sfx = {
+  const api = {
     enabled: true,
 
     /* 落子：p 是 0/1，isSeed 加一声上行的泛音 */
@@ -63,4 +59,5 @@
     bad: function () { tone(150, 0.12, 'square', 0.02); },
     undo: function () { tone(300, 0.08, 'sine', 0.022); }
   };
-})(typeof window !== 'undefined' ? window : globalThis);
+  return api;
+}

@@ -40,6 +40,7 @@ body{
 }
 .brand h1{margin:0;font-size:24px;font-weight:700;letter-spacing:.22em}
 .session-meta{margin-left:auto;color:var(--ink-2);font:11px var(--mono);letter-spacing:.08em;text-align:right}
+.copy-room{padding:6px 8px;font:10px/1 var(--mono);letter-spacing:0;white-space:nowrap}
 .brand p{margin:2px 0 0;font:11px/1.5 var(--mono);color:var(--ink-2);letter-spacing:.14em;text-transform:uppercase}
 
 /* 回合指示：方块色块用「实心 / 空心」区分双方 */
@@ -58,7 +59,7 @@ body{
 /* ---------- 两栏布局 ---------- */
 main{display:grid;grid-template-columns:minmax(320px,1fr) 340px;gap:18px;align-items:start}
 @media (max-width:880px){ main{grid-template-columns:1fr} }
-@media (max-width:600px){.session-meta{order:3;width:100%;margin-left:0;text-align:left}}
+@media (max-width:600px){.session-meta{order:3;width:100%;margin-left:0;text-align:left}.copy-room{order:4;margin-left:auto}}
 
 /* ---------- 页脚 ---------- */
 .foot{

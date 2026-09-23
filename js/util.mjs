@@ -6,17 +6,12 @@
  *   clamp01 / easeOut / TAU
  *   reduced  系统是否开启了「减弱动态效果」
  * ===================================================================== */
-(function (root) {
-  'use strict';
-
-  var ZJ = root.ZJ = root.ZJ || {};
-
-  var PERF = root.performance || (typeof performance !== 'undefined' ? performance : null);
-
-  ZJ.util = {
+export function createUtil({ documentRef = globalThis.document, windowRef = globalThis } = {}) {
+  const PERF = windowRef.performance || globalThis.performance || null;
+  return {
     TAU: Math.PI * 2,
 
-    $: function (id) { return document.getElementById(id); },
+    $: function (id) { return documentRef.getElementById(id); },
 
     now: function () { return PERF ? PERF.now() : Date.now(); },
 
@@ -24,6 +19,6 @@
 
     easeOut: function (u) { return 1 - Math.pow(1 - u, 3); },
 
-    reduced: !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    reduced: !!(windowRef.matchMedia && windowRef.matchMedia('(prefers-reduced-motion: reduce)').matches)
   };
-})(typeof window !== 'undefined' ? window : globalThis);
+}

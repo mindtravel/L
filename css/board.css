@@ -5,9 +5,9 @@
 
 .boardcard{
   background:var(--paper);border:1px solid var(--ink);padding:12px;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0;
 }
-#boardwrap{position:relative;width:100%;display:flex;justify-content:center}
+#boardwrap{position:relative;width:100%;min-width:0;overflow:hidden;display:flex;justify-content:center}
 canvas{display:block;cursor:crosshair;touch-action:none;outline:1px solid var(--hair-2);outline-offset:0}
 
 /* 换接缝的两根滚动轴：1px 轨道 + 方块滑块 */

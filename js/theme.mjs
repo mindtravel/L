@@ -4,12 +4,7 @@
  * 显示名、配色、尺寸、动画时长 —— 全部集中在这一个文件。
  * 想换名字 / 换配色，只改这里，别处不用动。
  * ===================================================================== */
-(function (root) {
-  'use strict';
-
-  var ZJ = root.ZJ = root.ZJ || {};
-
-  ZJ.theme = {
+export const theme = {
     /* ★ 换名字只改这一行 ★ —— 同时更新浏览器标签与页眉标题 */
     name: 'L',
 
@@ -43,5 +38,4 @@
     inkOf: function (p, a) {
       return p === 0 ? 'rgba(17,17,17,' + a + ')' : 'rgba(120,120,120,' + a + ')';
     }
-  };
-})(typeof window !== 'undefined' ? window : globalThis);
+};

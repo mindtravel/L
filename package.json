@@ -4,8 +4,9 @@
   "private": true,
   "description": "L：方格纸上的折角对弈",
   "scripts": {
-    "test": "node test/rules.test.js && node test/ui.smoke.js && node test/server.test.js",
-    "start": "node server.js"
+    "test": "node test/rules.test.mjs && node test/session.test.mjs && node test/setup-controller.test.mjs && node test/game-snapshot.test.mjs && node test/release-script.test.mjs && node test/ui.smoke.js && node test/server.test.js",
+    "start": "node server.mjs",
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

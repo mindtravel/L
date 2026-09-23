@@ -6,16 +6,12 @@
  *   2. 渲染：把局面画成黑白线条图
  *   3. 视图状态：观察原点（拖棋盘）、选中哪个格点、鼠标在哪、要不要重画
  *
- * 只读 ZJ.game 提供的局面，不改它。
+ * 只读注入的 game 局面，不改它。
  *
  * 关于「观察原点」：环面上没有真正的边角，接缝落在哪一格只是观察方式。
  * 拖动棋盘就是把原点挪一格，于是接缝跟着挪 —— 局面本身一动不动。
  * ===================================================================== */
-(function (root) {
-  'use strict';
-
-  var ZJ = root.ZJ = root.ZJ || {};
-  var U = ZJ.util, T = ZJ.theme, R = ZJ.rules;
+export function createBoard({ game, util: U, theme: T, rules: R, effects: fxSystem, scheduler, documentRef = globalThis.document, windowRef = globalThis }) {
 
   var canvas = null, ctx = null, wrapEl = null;
 
@@ -41,13 +37,13 @@
   function vkey(v) { return v.x + ',' + v.y; }
 
   function init() {
-    canvas = U.$('board');
-    wrapEl = U.$('boardwrap');
+    canvas = documentRef.getElementById('board');
+    wrapEl = documentRef.getElementById('boardwrap');
     ctx = canvas.getContext('2d');
   }
 
   function layout() {
-    var state = ZJ.game.state();
+    var state = game.state();
     var avail = wrapEl.clientWidth || 520;
     var maxPx = Math.max(300, Math.min(avail, 680));
     var base = 20;                                   // 盘面外还要留的空白
@@ -56,7 +52,7 @@
     pad = base + Math.round(cell * T.wrap);
 
     var cw = state.W * cell + pad * 2, ch = state.H * cell + pad * 2;
-    var dpr = root.devicePixelRatio || 1;
+    var dpr = windowRef.devicePixelRatio || 1;
     canvas.style.width = cw + 'px';
     canvas.style.height = ch + 'px';
     canvas.width = Math.round(cw * dpr);
@@ -105,19 +101,19 @@
     wakeUntil = U.now() + (ms || T.dur.wake);
     /* Rendering is demand-driven.  The game loop is woken only when a
        state/input change actually needs a frame. */
-    if (ZJ.scheduler) ZJ.scheduler.wake();
+    if (scheduler) scheduler.wake();
   }
 
   function markViewDirty() {
     dirty = true;
-    if (ZJ.scheduler) ZJ.scheduler.wake();
+    if (scheduler) scheduler.wake();
   }
 
   function needsFrame(t) {
     /* Selected/hovered vertices animate their dashed affordances, so they
        remain a live render source until the pointer state is cleared. */
-    return dirty || !!selected || !!hover || ZJ.fx.alive() ||
-      t < wakeUntil || t < ZJ.fx.winPulseUntil;
+    return dirty || !!selected || !!hover || fxSystem.alive() ||
+      t < wakeUntil || t < fxSystem.winPulseUntil;
   }
 
   /* ------------------------------------------------------------------ */
@@ -125,7 +121,7 @@
   /* ------------------------------------------------------------------ */
 
   function setView(x, y) {
-    var state = ZJ.game.state();
+    var state = game.state();
     if (!state) return;
     viewX = R.wrapX(state, x);
     viewY = R.wrapY(state, y);
@@ -142,7 +138,7 @@
   /* ------------------------------------------------------------------ */
 
   function draw(t) {
-    var state = ZJ.game.state();
+    var state = game.state();
     if (!state) return;
     dirty = false;                    // 画完就算「干净」了
 
@@ -151,9 +147,9 @@
 
     /* 每帧索引：正在折出来的线段（grow）、其远端节点（growFar，用于淡入） */
     var grow = {}, growFar = {};
-    for (var i = 0; i < ZJ.fx.list.length; i++) {
-      var e = ZJ.fx.list[i];
-      var eu = ZJ.fx.u(e, t);
+    for (var i = 0; i < fxSystem.list.length; i++) {
+      var e = fxSystem.list[i];
+      var eu = fxSystem.u(e, t);
       if (eu < 0 || e.k !== 'edge') continue;
       grow[edgeKey(e.sx, e.sy, e.ex, e.ey)] = e;
       if (eu < 1) {
@@ -202,9 +198,9 @@
        跟着鼠标走既能看清该往哪落，又不吵。 */
     var armMinor = Math.max(1.8, cell * 0.046);
     var armHot = Math.max(2.8, cell * 0.082);
-    var showHints = ZJ.game.cfg.hints && ZJ.game.isHumanTurn() && mouse;
+    var showHints = game.cfg.hints && game.isHumanTurn() && mouse;
     var hintR2 = (cell * 2.8) * (cell * 2.8);
-    var legal = ZJ.game.legalCorners();
+    var legal = game.legalCorners();
     ctx.lineWidth = 1;
 
     ctx.strokeStyle = T.cross;
@@ -305,7 +301,7 @@
     }
 
     /* --- 终局四连：四格逐个亮起（不画连线，接缝上才不会拉出一条假线） --- */
-    if (state.winLine && t < ZJ.fx.winPulseUntil) {
+    if (state.winLine && t < fxSystem.winPulseUntil) {
       var pulse = 0.55 + 0.45 * Math.sin(t / 300);
       for (var wi = 0; wi < state.winLine.length; wi++) {
         wrapWinMark(state, state.winLine[wi][0], state.winLine[wi][1], state.winner, pulse);
@@ -323,9 +319,9 @@
   }
 
   function isLast(x, y, kind, t) {
-    var lm = ZJ.game.state().lastMove;
+    var lm = game.state().lastMove;
     if (!lm) return false;
-    if (t - ZJ.game.lastMoveAt() > T.dur.lastMove) return false;
+    if (t - game.lastMoveAt() > T.dur.lastMove) return false;
     for (var i = 0; i < lm.edges.length; i++) {
       var e = lm.edges[i];
       if (e.kind === kind && e.x === x && e.y === y) return true;
@@ -385,7 +381,7 @@
       var eff = grow[kind + ':' + ex + ',' + ey];
       if (eff) {
         sx = eff.sx; sy = eff.sy; fx = eff.ex; fy = eff.ey;
-        u = U.clamp01(ZJ.fx.u(eff, t));
+        u = U.clamp01(fxSystem.u(eff, t));
       }
       /* Animation endpoints are sometimes stored as the unwrapped far
          vertex (W or -1).  Keep the segment local before applying the
@@ -571,8 +567,8 @@
 
   /* ---- 特效绘制：怎么画由这里决定，播什么由 fx.js 决定 ---- */
   function drawEffects(state, t) {
-    for (var i = 0; i < ZJ.fx.list.length; i++) {
-      var e = ZJ.fx.list[i], u = ZJ.fx.u(e, t);
+    for (var i = 0; i < fxSystem.list.length; i++) {
+      var e = fxSystem.list[i], u = fxSystem.u(e, t);
       if (u < 0) continue;
       u = U.clamp01(u);
       switch (e.k) {
@@ -611,7 +607,7 @@
   /* ------------------------------------------------------------------ */
 
   function hitVertex(mx, my) {
-    var state = ZJ.game.state();
+    var state = game.state();
     var vx = Math.round((mx - pad) / cell), vy = Math.round((my - pad) / cell);
     /* 允许点到盘外那一圈：它显示的就是接过来的那一列 / 行 */
     if (vx < -1 || vx > state.W || vy < -1 || vy > state.H) return null;
@@ -632,7 +628,7 @@
 
   /* ------------------------------------------------------------------ */
 
-  ZJ.board = {
+  return {
     init: init,
     layout: layout,
     draw: draw,
@@ -659,4 +655,4 @@
     hitVertex: hitVertex,
     quadrantAt: quadrantAt
   };
-})(typeof window !== 'undefined' ? window : globalThis);
+}

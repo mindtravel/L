@@ -11,18 +11,14 @@
  *
  * 系统开了「减弱动态效果」时 add() 直接丢弃，什么都不播。
  * ===================================================================== */
-(function (root) {
-  'use strict';
-
-  var ZJ = root.ZJ = root.ZJ || {};
-
-  ZJ.fx = {
+export function createEffects({ util, theme, random = Math.random }) {
+  const fx = {
     list: [],
     winPulseUntil: 0,          // 终局高亮画到什么时候（由 board 读）
 
     add: function (e) {
-      if (ZJ.util.reduced) return null;
-      e.t0 = ZJ.util.now();
+      if (util.reduced) return null;
+      e.t0 = util.now();
       e.delay = e.delay || 0;
       this.list.push(e);
       return e;
@@ -56,18 +52,18 @@
         var far = (e.kind === 'h')
           ? (from ? [e.x + 1, e.y] : [e.x, e.y])
           : (from ? [e.x, e.y + 1] : [e.x, e.y]);
-        ZJ.fx.add({
+        fx.add({
           k: 'edge', sx: rec.x, sy: rec.y, ex: far[0], ey: far[1],
-          p: rec.player, dur: ZJ.theme.dur.edge
+          p: rec.player, dur: theme.dur.edge
         });
       }
     },
 
     /* 起笔：起点扩散一圈涟漪 */
     seedRing: function (x, y, p) {
-      ZJ.fx.add({
+      fx.add({
         k: 'ring', x: x, y: y, p: p,
-        r0: 0.10, r1: 0.62, w: 0.04, dur: ZJ.theme.dur.seedRing
+        r0: 0.10, r1: 0.62, w: 0.04, dur: theme.dur.seedRing
       });
     },
 
@@ -75,32 +71,33 @@
     winBurst: function (line, p) {
       var i;
       for (i = 0; i < line.length; i++) {
-        ZJ.fx.add({
+        fx.add({
           k: 'ring', x: line[i][0] + 0.5, y: line[i][1] + 0.5, p: p,
           r0: 0.2, r1: 1.25, w: 0.04, dur: 780, delay: i * 95
         });
-        ZJ.fx.add({
+        fx.add({
           k: 'glow', cx: line[i][0], cy: line[i][1], p: p,
-          dur: ZJ.theme.dur.glow, delay: i * 95
+          dur: theme.dur.glow, delay: i * 95
         });
       }
-      if (!ZJ.util.reduced) {
-        var TAU = ZJ.util.TAU;
+      if (!util.reduced) {
+        var TAU = util.TAU;
         for (var j = 0; j < 18; j++) {
           var c = line[j % line.length];
-          var a = Math.random() * TAU, sp = 0.5 + Math.random() * 1.4;
-          ZJ.fx.add({
+          var a = random() * TAU, sp = 0.5 + random() * 1.4;
+          fx.add({
             k: 'spark',
-            x: c[0] + 0.5 + (Math.random() - 0.5) * 0.6,
-            y: c[1] + 0.5 + (Math.random() - 0.5) * 0.6,
+            x: c[0] + 0.5 + (random() - 0.5) * 0.6,
+            y: c[1] + 0.5 + (random() - 0.5) * 0.6,
             vx: Math.cos(a) * sp * 0.35, vy: Math.sin(a) * sp * 0.35 - 0.5,
-            p: p, size: 0.022 + Math.random() * 0.022,
-            dur: ZJ.theme.dur.sparks + Math.random() * 700,
-            delay: Math.random() * 320
+            p: p, size: 0.022 + random() * 0.022,
+            dur: theme.dur.sparks + random() * 700,
+            delay: random() * 320
           });
         }
       }
-      this.winPulseUntil = ZJ.util.now() + ZJ.theme.dur.winPulse;
+      this.winPulseUntil = util.now() + theme.dur.winPulse;
     }
   };
-})(typeof window !== 'undefined' ? window : globalThis);
+  return fx;
+}

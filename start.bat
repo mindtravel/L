@@ -1,6 +1,13 @@
 @echo off
 rem =====================================================================
-rem  Double-click this file to open the game in your default browser.
-rem  (You can also just double-click index.html directly.)
+rem Start the local HTTP/WebSocket server, then open the game page.
 rem =====================================================================
-start "" "%~dp0index.html"
+cd /d "%~dp0"
+if not exist "node_modules\ws" (
+  echo Dependencies are missing. Run npm install first.
+  pause
+  exit /b 1
+)
+start "L server" cmd /k npm start
+timeout /t 2 /nobreak >nul
+start "" "http://localhost:8000"

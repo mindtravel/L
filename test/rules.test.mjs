@@ -1,10 +1,8 @@
 /*!
  * 直角 · 规则自测  (node test/rules.test.js)
  */
-'use strict';
-
-const R = require('../js/rules.js');
-const AI = require('../js/ai.js');
+import * as R from '../js/rules.mjs';
+import * as AI from '../js/ai.mjs';
 
 let passed = 0, failed = 0;
 function ok(cond, name) {
@@ -92,7 +90,7 @@ section('5. 起笔 vs 续线，以及起笔耗尽');
 }
 
 /* ---------------------------------------------------------------- */
-section('6. 交叉：允许与对方共享格点，但不许共用线段');
+section('6. 接触：所有接触允许，只有线段重叠不允许');
 {
   const s = R.createGame(9, 9, 3);
   R.applyMove(s, R.validateMove(s, 3, 3, 1));       // 黑 h(3,3) v(3,3)
@@ -109,10 +107,25 @@ section('6. 交叉：允许与对方共享格点，但不许共用线段');
   R.applyMove(t, R.validateMove(t, 3, 5, 1));       // 白起笔 h(3,5) v(3,5)
   t.turn = R.BLUE;
   const bm = R.validateMove(t, 3, 4, 1);            // 白 SE：h(3,4)+v(3,4)，在 (3,4) 与黑交叉
-  ok(bm && bm.isSeed === false, '白可贴着黑方交叉续线（共享格点、不共享线段）');
+  ok(bm && bm.isSeed === false, '续线接触对方也合法，不消耗种子');
   R.applyMove(t, bm);
   ok(R.edgeOwner(t, { kind: 'v', x: 3, y: 3 }) === R.RED &&
      R.edgeOwner(t, { kind: 'v', x: 3, y: 4 }) === R.BLUE, '交叉点上两条边分属黑白');
+}
+
+section('6a. 种子：起笔也允许接触对手');
+{
+  const s = R.createGame(9, 9, 3);
+  R.applyMove(s, R.validateMove(s, 3, 3, 1));
+  const seed = R.validateMove(s, 4, 3, 1);
+  ok(seed && seed.isSeed === true, '没有接上己方线时，接触对手仍是种子');
+  R.applyMove(s, seed);
+  ok(s.seeds[R.BLUE] === 2 && s.lastMove.isSeed, '接触对手的种子仍消耗一次起笔');
+  const noSeeds = R.createGame(9, 9, 3);
+  R.applyMove(noSeeds, R.validateMove(noSeeds, 3, 3, 1));
+  noSeeds.seeds[R.BLUE] = 0;
+  ok(R.validateMove(noSeeds, 4, 3, 1) === null, '没有剩余种子时不能在只接触对手处另起一线');
+  ok(R.validateMove(s, 3, 3, 1) === null, '种子仍不能占用对手已有线段');
 }
 
 section('6b. 死边：所有折角都被占满时，线段再也放不下去');
@@ -185,6 +198,16 @@ section('9. 完整对局：AI 接力，规则始终自洽');
   ok(s.winner === 'draw' || R.findWinLine(s, s.winner, null) !== null, '胜者的四格线真实存在');
   console.log('    → 终局：' + (s.winner === 'draw' ? '和棋' : R.playerName(s.winner) + '方胜') +
               '，黑成格 ' + R.countCells(s, R.RED) + ' 格，白成格 ' + R.countCells(s, R.BLUE) + ' 格');
+}
+
+/* ---------------------------------------------------------------- */
+section('9b. AI 强度：随手档会随机落子，也会实际使用种子');
+{
+  const s = R.createGame(13, 13, 3);
+  const first = AI.chooseAIMove(s, { level: 1, random: () => 0 });
+  const last = AI.chooseAIMove(s, { level: 1, random: () => 0.999999 });
+  ok(first && first.isSeed && last && last.isSeed, '空盘随机起笔会消耗种子');
+  ok(first.x !== last.x || first.y !== last.y || first.q !== last.q, '随机数会改变随手档的着法');
 }
 
 /* ---------------------------------------------------------------- */
